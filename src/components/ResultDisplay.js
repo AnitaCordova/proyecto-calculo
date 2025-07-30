@@ -31,6 +31,8 @@ const ResultDisplay = ({ result, operation, functionInput, limitPoint, error }) 
         return 'Derivada';
       case 'limit':
         return 'Límite';
+      case 'epsilon-delta':
+        return 'Demostración ε-δ';
       case 'graph':
         return 'Función';
       default:
@@ -51,6 +53,8 @@ const ResultDisplay = ({ result, operation, functionInput, limitPoint, error }) 
         const point = limitPoint === 'infinity' ? '∞' : 
                      limitPoint === '-infinity' ? '-∞' : limitPoint;
         return `lim(x→${point}) ${formattedInput} = ${formatExpression(resultValue)}`;
+      case 'epsilon-delta':
+        return resultValue;
       case 'graph':
         return `f(x) = ${formattedInput}`;
       default:

@@ -2,18 +2,22 @@ import React, { useState, useEffect } from 'react';
 import FunctionInput from './components/FunctionInput';
 import OperationSelector from './components/OperationSelector';
 import LimitInput from './components/LimitInput';
+import EpsilonDeltaInput from './components/EpsilonDeltaInput';
+import EpsilonDeltaExamples from './components/EpsilonDeltaExamples';
 import ResultDisplay from './components/ResultDisplay';
 import FunctionGraph from './components/FunctionGraph';
 import WelcomeScreen from './components/WelcomeScreen';
-import { calculateDerivative, calculateLimit, debugParse } from './utils/calculus';
+import { calculateDerivative, calculateLimit, calculateLimitEpsilonDelta, debugParse } from './utils/calculus';
 
 function App() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [functionInput, setFunctionInput] = useState('');
   const [selectedOperation, setSelectedOperation] = useState('derivative');
   const [limitPoint, setLimitPoint] = useState('0');
+  const [epsilon, setEpsilon] = useState('0.1');
   const [result, setResult] = useState('');
   const [error, setError] = useState('');
+  const [showEpsilonDeltaExamples, setShowEpsilonDeltaExamples] = useState(false);
 
   // Calculate result when inputs change
   useEffect(() => {
@@ -38,6 +42,9 @@ function App() {
         case 'limit':
           calculatedResult = calculateLimit(functionInput, 'x', limitPoint);
           break;
+        case 'epsilon-delta':
+          calculatedResult = calculateLimitEpsilonDelta(functionInput, 'x', limitPoint, epsilon);
+          break;
         case 'graph':
           // For graphing, we don't need a symbolic result
           calculatedResult = functionInput;
@@ -52,7 +59,16 @@ function App() {
       setError(err.message);
       setResult('');
     }
-  }, [functionInput, selectedOperation, limitPoint]);
+  }, [functionInput, selectedOperation, limitPoint, epsilon]);
+
+  // Handle example selection
+  const handleExampleSelection = (example) => {
+    setFunctionInput(example.function);
+    setLimitPoint(example.point);
+    setEpsilon(example.epsilon);
+    setSelectedOperation('epsilon-delta');
+    setShowEpsilonDeltaExamples(false);
+  };
 
   // Show welcome screen if not started
   if (showWelcome) {
@@ -98,8 +114,8 @@ function App() {
               />
             </div>
 
-            {/* Limit Input (only show for limit operation) */}
-            {selectedOperation === 'limit' && (
+            {/* Limit Input (only show for limit and epsilon-delta operations) */}
+            {(selectedOperation === 'limit' || selectedOperation === 'epsilon-delta') && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <LimitInput 
                   limitPoint={limitPoint}
@@ -108,8 +124,35 @@ function App() {
               </div>
             )}
 
+            {/* Epsilon Input (only show for epsilon-delta operation) */}
+            {selectedOperation === 'epsilon-delta' && (
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <EpsilonDeltaInput 
+                  epsilon={epsilon}
+                  onEpsilonChange={setEpsilon}
+                  limitPoint={limitPoint}
+                />
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => setShowEpsilonDeltaExamples(!showEpsilonDeltaExamples)}
+                    className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                  >
+                    {showEpsilonDeltaExamples ? 'Ocultar ejemplos' : 'Ver ejemplos detallados de ε-δ'}
+                    <svg
+                      className={`ml-1 h-4 w-4 transform transition-transform ${showEpsilonDeltaExamples ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Result Display */}
-            {(selectedOperation === 'derivative' || selectedOperation === 'limit') && (
+            {(selectedOperation === 'derivative' || selectedOperation === 'limit' || selectedOperation === 'epsilon-delta') && (
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <ResultDisplay 
                   result={result}
@@ -118,6 +161,13 @@ function App() {
                   limitPoint={limitPoint}
                   error={error}
                 />
+              </div>
+            )}
+
+            {/* Epsilon-Delta Examples */}
+            {showEpsilonDeltaExamples && (
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <EpsilonDeltaExamples onSelectExample={handleExampleSelection} />
               </div>
             )}
           </div>
@@ -140,15 +190,15 @@ function App() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-800">
             <div>
               <h4 className="font-medium mb-2">1. Ingresa la Función</h4>
-              <p>Usa notación matemática estándar: x^2, sin(x), ln(x), sqrt(x), etc.</p>
+              <p>Usa el teclado matemático o notación estándar: x^2, sin(x), ln(x), sqrt(x), sinh(x), arcsin(x), etc.</p>
             </div>
             <div>
               <h4 className="font-medium mb-2">2. Elige la Operación</h4>
-              <p>Selecciona derivada, límite o gráfica para ver el resultado y visualización.</p>
+              <p>Selecciona derivada, límite, ε-δ o gráfica para ver el resultado y visualización.</p>
             </div>
             <div>
               <h4 className="font-medium mb-2">3. Ver Resultados</h4>
-              <p>Ve resultados simbólicos y gráficas interactivas con resaltado de discontinuidades.</p>
+              <p>Ve resultados simbólicos, pasos detallados y gráficas interactivas con resaltado de discontinuidades.</p>
             </div>
           </div>
         </div>

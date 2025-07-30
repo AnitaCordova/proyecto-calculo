@@ -4,6 +4,7 @@ const OperationSelector = ({ selectedOperation, onOperationChange }) => {
   const operations = [
     { id: 'derivative', label: 'Derivada', description: 'Calcular f\'(x)' },
     { id: 'limit', label: 'Límite', description: 'Calcular límite cuando x tiende a un punto' },
+    { id: 'epsilon-delta', label: 'ε-δ', description: 'Demostrar límite usando definición formal' },
     { id: 'graph', label: 'Gráfica', description: 'Graficar la función' }
   ];
 
@@ -12,7 +13,7 @@ const OperationSelector = ({ selectedOperation, onOperationChange }) => {
       <label className="block text-sm font-medium text-gray-700">
         Operación
       </label>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         {operations.map((operation) => (
           <button
             key={operation.id}
